@@ -42,6 +42,12 @@ let
           cfg.docker.client.package
         ];
         environment.ARION_PREBUILT = config.settings.out.dockerComposeYaml;
+
+        serviceConfig = {
+          KillMode = "mixed"; # oder "process"
+          ExecStop = "${cfg.package}/bin/arion --prebuilt-file ${config.settings.out.dockerComposeYaml} down";
+        };
+
         script = ''
           echo 1>&2 "docker compose file: $ARION_PREBUILT"
           arion --prebuilt-file "$ARION_PREBUILT" up
@@ -102,7 +108,7 @@ in
         virtualisation.docker.enable = false;
         virtualisation.podman.enable = true;
         virtualisation.podman.dockerSocket.enable = true;
-        virtualisation.podman.defaultNetwork = 
+        virtualisation.podman.defaultNetwork =
           if options?virtualisation.podman.defaultNetwork.settings
           then { settings.dns_enabled = true; } # since 2023-01 https://github.com/NixOS/nixpkgs/pull/199965
           else { dnsname.enable = true; }; # compat <2023
